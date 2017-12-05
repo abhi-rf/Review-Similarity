@@ -24,7 +24,7 @@ def fetch_reviews():
     #    return json.load(data_file.read())    
 
     #json_data = json.load(open('C:/Users/Dell/Downloads/reviews_Electronics_5.json'))
-    json_data = json.load(open('C:/Users/Dell/Desktop/reviews.json'))
+    json_data = json.load(open('C:/Users/Dell/Desktop/reviews_short.json'))
     return json_data
 
 def preprocess(raw_text):
@@ -51,10 +51,10 @@ def preprocess(raw_text):
 
 def cosine_calculator(reviews):
     tfidf_vectorizer = TfidfVectorizer()
-    tfidf_matrix = tfidf_vectorizer.fit_transform(reviews)
+    tfidf_matrix = tfidf_vectorizer.fit_transform(reviews[0] for reviews in reviews)
     cs = cosine_similarity(tfidf_matrix[0:1],tfidf_matrix)
     cs = numpy.array(cs)
-    numpy.sort(cs)
+    #numpy.sort(cs)
     return cs
     
 
@@ -64,21 +64,42 @@ if __name__ == "__main__":
     #n is for the final acceptable reviews we will have after preprocessing and having more than 10 words
     n = 0 
     for i in range(len(reviews_fetched)):
-        reviews_fetched[i]=preprocess((reviews_fetched[i]["reviewText"]))        
-        if(len(reviews_fetched[i])>10):
+        reviews_fetched[i][0]=preprocess((reviews_fetched[i]["reviewText"]))
+        reviews_fetched[i][1]=reviews_fetched[i]["reviewerID"]
+        if(len(reviews_fetched[i][0])>10):
             reviews.append(reviews_fetched[i])
             n = n+1
             
+    rev_id = []
     for i in range(n):
-        print(i," ",len(reviews[i]))
-
+        #print(i," ",len(reviews[i][0]))
+        rev_id.append(reviews[i][1])
     
+    rev_id = numpy.asarray(rev_id)
+    rev_id = rev_id.transpose()
+    #print(rev_id.shape)
+    similarity_matrix = []
     #print(cs)
     for i in range(n):
         reviews.insert(0,reviews[i])
         cs = cosine_calculator(reviews)
-        print(cs.shape)
-        print(cs)
+        
+        #sorted(cs,key=lambda x: x[0])
+        #cs = cs[numpy.argsort(cs[0,:])]
+        #cs = cs[0].sort()
+        cs = cs.transpose()
+        #cs = numpy.insert(cs,1,values=reviews[][])
+        #print(cs.shape)
+        #print(cs)
+        print(" ")
         reviews.pop(0)
+        cs=numpy.delete(cs,0)
+        #print(cs.shape)
+        cs = numpy.column_stack((cs,rev_id))
+        cs = cs[cs[:,0].argsort()[::-1]]
+        cs = cs[0:4,:]
+        print(cs)
+        similarity_matrix.append(cs)
         #for i in range(n):
+    
     

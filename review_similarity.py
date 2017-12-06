@@ -66,6 +66,8 @@ if __name__ == "__main__":
     for i in range(len(reviews_fetched)):
         reviews_fetched[i][0]=preprocess((reviews_fetched[i]["reviewText"]))
         reviews_fetched[i][1]=reviews_fetched[i]["reviewerID"]
+        
+        #Removing reviews with less than 10 words
         if(len(reviews_fetched[i][0])>10):
             reviews.append(reviews_fetched[i])
             n = n+1

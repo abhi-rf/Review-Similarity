@@ -8,6 +8,8 @@ import ctypes, sys
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy
+import networkx as nx
+import matplotlib.pyplot as plt
 numpy.set_printoptions(threshold=numpy.nan)
 
 
@@ -60,14 +62,13 @@ def cosine_calculator(reviews):
 
 if __name__ == "__main__":
     reviews=[]
+    G = nx.Graph()
     reviews_fetched = fetch_reviews()
     #n is for the final acceptable reviews we will have after preprocessing and having more than 10 words
     n = 0 
     for i in range(len(reviews_fetched)):
         reviews_fetched[i][0]=preprocess((reviews_fetched[i]["reviewText"]))
         reviews_fetched[i][1]=reviews_fetched[i]["reviewerID"]
-        
-        #Removing reviews with less than 10 words
         if(len(reviews_fetched[i][0])>10):
             reviews.append(reviews_fetched[i])
             n = n+1
@@ -83,25 +84,28 @@ if __name__ == "__main__":
     similarity_matrix = []
     #print(cs)
     for i in range(n):
+        print(i)
         reviews.insert(0,reviews[i])
         cs = cosine_calculator(reviews)
-        
-        #sorted(cs,key=lambda x: x[0])
-        #cs = cs[numpy.argsort(cs[0,:])]
-        #cs = cs[0].sort()
         cs = cs.transpose()
-        #cs = numpy.insert(cs,1,values=reviews[][])
-        #print(cs.shape)
-        #print(cs)
         print(" ")
         reviews.pop(0)
         cs=numpy.delete(cs,0)
-        #print(cs.shape)
         cs = numpy.column_stack((cs,rev_id))
         cs = cs[cs[:,0].argsort()[::-1]]
-        cs = cs[0:4,:]
-        print(cs)
+        cs = cs[0:6,:]
+        #print(cs)
+        G.add_node(cs[0][1])
         similarity_matrix.append(cs)
-        #for i in range(n):
-    
-    
+        #print(list(G.nodes))
+        print("")
+        for j in range(5):
+            G.add_edge(similarity_matrix[i][0][1],similarity_matrix[i][j+1][1])
+
+    options = {'node_color':'red',
+                'node_size':9,
+                'width':0.87}
+    nx.drawing.draw(G,with_labels=False,**options)
+    #plt.subplot()
+    plt.show()
+    plt.savefig('C:/Users/Dell/Desktop/result.png')
